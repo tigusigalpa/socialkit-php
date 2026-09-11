@@ -1,0 +1,80 @@
+{
+    "name": "tigusigalpa/socialkit-php",
+    "description": "A modern, framework-agnostic PHP SDK for the SocialKit API, with first-class Laravel 10, 11, 12 & 13 integration.",
+    "type": "library",
+    "keywords": [
+        "socialkit",
+        "social-media",
+        "scraper",
+        "sdk",
+        "laravel",
+        "api-client",
+        "youtube",
+        "tiktok",
+        "instagram",
+        "facebook",
+        "twitter",
+        "linkedin"
+    ],
+    "homepage": "https://github.com/tigusigalpa/socialkit-php",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Igor Sazonov",
+            "email": "sovletig@gmail.com",
+            "homepage": "https://github.com/tigusigalpa"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/tigusigalpa/socialkit-php/issues",
+        "source": "https://github.com/tigusigalpa/socialkit-php"
+    },
+    "require": {
+        "php": "^8.1",
+        "psr/http-client": "^1.0",
+        "psr/http-factory": "^1.0",
+        "psr/http-message": "^1.1 || ^2.0",
+        "guzzlehttp/guzzle": "^7.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5 || ^11.0 || ^12.0",
+        "orchestra/testbench": "^8.0 || ^9.0 || ^10.0 || ^11.0",
+        "illuminate/support": "^10.0 || ^11.0 || ^12.0 || ^13.0"
+    },
+    "suggest": {
+        "illuminate/support": "Required to use the Laravel service provider and facade (^10.0 || ^11.0 || ^12.0 || ^13.0)."
+    },
+    "autoload": {
+        "psr-4": {
+            "Tigusigalpa\\SocialKit\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tigusigalpa\\SocialKit\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Tigusigalpa\\SocialKit\\Laravel\\SocialKitServiceProvider"
+            ],
+            "aliases": {
+                "SocialKit": "Tigusigalpa\\SocialKit\\Laravel\\Facades\\SocialKit"
+            }
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "config": {
+        "sort-packages": true,
+        "policy": {
+            "advisories": {
+                "block": false
+            }
+        }
+    }
+}

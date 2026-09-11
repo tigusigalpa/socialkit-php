@@ -1,0 +1,42 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tigusigalpa\SocialKit\Dto;
+
+/**
+ * Request DTO for LinkedIn company posts endpoint.
+ *
+ * @see https://docs.socialkit.dev/api-reference/linkedin-company-api-posts
+ */
+final class CompanyPostsRequest
+{
+    public function __construct(
+        public readonly string $url,
+        public readonly ?int $limit = null,
+        public readonly bool $cache = false,
+        public readonly int $cacheTtl = 2_592_000,
+    ) {
+        if ($cacheTtl < 3600 || $cacheTtl > 2_592_000) {
+            throw new \InvalidArgumentException('cacheTtl must be between 3600 and 2592000 seconds.');
+        }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function toArray(): array
+    {
+        $arr = [
+            'url' => $this->url,
+            'cache' => $this->cache,
+            'cache_ttl' => $this->cacheTtl,
+        ];
+
+        if ($this->limit !== null) {
+            $arr['limit'] = $this->limit;
+        }
+
+        return $arr;
+    }
+}
