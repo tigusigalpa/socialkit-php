@@ -62,6 +62,9 @@ final class SocialKitClient implements SocialKitClientInterface
         '/credits',
     ];
 
+    /** Maximum number of bytes retained from a non-2xx response body. */
+    private const MAX_ERROR_BODY_SIZE = 1_048_576;
+
     /**
      * @param SocialKitConfig             $config         SDK configuration (access key, base URL, retry policy, etc.).
      * @param ClientInterface|null        $httpClient     Any PSR-18 compatible HTTP client. Defaults to Guzzle.
@@ -208,7 +211,7 @@ final class SocialKitClient implements SocialKitClientInterface
         while (true) {
             try {
                 return $this->send($method, $path, $body, $query);
-            } catch (RateLimitException | ServerException $e) {
+            } catch (RateLimitException | ServerException | TransportException | TimeoutException $e) {
                 if ($attempt >= $maxAttempts) {
                     throw $e;
                 }
@@ -264,8 +267,11 @@ final class SocialKitClient implements SocialKitClientInterface
             $request = $request->withHeader($name, (string) $value);
         }
 
-        // Authentication: header by default, query/body if keyInQuery is true
+        // Authentication always uses the header. keyInQuery additionally sends
+        // the key in the query/body for compatibility with legacy integrations.
         if ($this->config->accessKey !== '') {
+            $request = $request->withHeader('x-access-key', $this->config->accessKey);
+
             if ($this->config->keyInQuery) {
                 if ($method === 'GET') {
                     $existingQuery = $uri->getQuery();
@@ -275,8 +281,6 @@ final class SocialKitClient implements SocialKitClientInterface
                 } elseif ($body !== null) {
                     $body['access_key'] = $this->config->accessKey;
                 }
-            } else {
-                $request = $request->withHeader('x-access-key', $this->config->accessKey);
             }
         }
 
@@ -296,22 +300,22 @@ final class SocialKitClient implements SocialKitClientInterface
             $response = $this->httpClient->sendRequest($request);
         } catch (ConnectException $e) {
             if (str_contains(strtolower($e->getMessage()), 'timeout')) {
-                throw new TimeoutException('SocialKit API request timed out: ' . $e->getMessage(), $e);
+                throw new TimeoutException('SocialKit API request timed out: ' . $this->redactKey($e->getMessage()), $e);
             }
-            throw new TransportException('SocialKit API transport error: ' . $e->getMessage(), $e);
+            throw new TransportException('SocialKit API transport error: ' . $this->redactKey($e->getMessage()), $e);
         } catch (ClientExceptionInterface $e) {
             $previous = $e->getPrevious();
             if ($previous instanceof ConnectException) {
                 if (str_contains(strtolower($previous->getMessage()), 'timeout')) {
-                    throw new TimeoutException('SocialKit API request timed out: ' . $previous->getMessage(), $previous);
+                    throw new TimeoutException('SocialKit API request timed out: ' . $this->redactKey($previous->getMessage()), $previous);
                 }
-                throw new TransportException('SocialKit API transport error: ' . $previous->getMessage(), $previous);
+                throw new TransportException('SocialKit API transport error: ' . $this->redactKey($previous->getMessage()), $previous);
             }
-            throw new TransportException('SocialKit API request failed: ' . $e->getMessage(), $e);
+            throw new TransportException('SocialKit API request failed: ' . $this->redactKey($e->getMessage()), $e);
         }
 
         $statusCode = $response->getStatusCode();
-        $rawBody = (string) $response->getBody();
+        $rawBody = $this->readResponseBody($response, $statusCode);
         $redactedBody = $this->redactKey($rawBody);
 
         $body = [];
@@ -401,5 +405,33 @@ final class SocialKitClient implements SocialKitClientInterface
         }
 
         return false;
+    }
+
+    /**
+     * Read a response body without retaining arbitrarily large error pages.
+     *
+     * Successful API responses are read in full because they contain the data
+     * the caller requested. Error responses are only retained for diagnostics
+     * and are bounded to prevent an upstream server from exhausting memory.
+     */
+    private function readResponseBody(ResponseInterface $response, int $statusCode): string
+    {
+        $stream = $response->getBody();
+
+        if ($statusCode >= 200 && $statusCode < 300) {
+            return (string) $stream;
+        }
+
+        $body = '';
+        while (!$stream->eof() && strlen($body) < self::MAX_ERROR_BODY_SIZE) {
+            $chunk = $stream->read(min(8192, self::MAX_ERROR_BODY_SIZE - strlen($body)));
+            if ($chunk === '') {
+                break;
+            }
+
+            $body .= $chunk;
+        }
+
+        return $body;
     }
 }

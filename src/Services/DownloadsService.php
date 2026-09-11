@@ -42,7 +42,11 @@ final class DownloadsService extends AbstractService
      */
     public function get(string $jobId): ApiResponse
     {
-        return $this->getRequest('/v2/downloads/' . urlencode($jobId), [], V2Job::class);
+        if ($jobId === '') {
+            throw new \InvalidArgumentException('jobId must not be empty.');
+        }
+
+        return $this->getRequest('/v2/downloads/' . rawurlencode($jobId), [], V2Job::class);
     }
 
     /**

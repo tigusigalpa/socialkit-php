@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tigusigalpa\SocialKit\Laravel\Facades;
 
 use Illuminate\Support\Facades\Facade;
+use Tigusigalpa\SocialKit\Laravel\SocialKitFake;
 use Tigusigalpa\SocialKit\SocialKitClientInterface;
 use Tigusigalpa\SocialKit\Services\DownloadsService;
 use Tigusigalpa\SocialKit\Services\FacebookService;
@@ -35,6 +36,18 @@ use Tigusigalpa\SocialKit\Services\YouTubeService;
  */
 final class SocialKit extends Facade
 {
+    /**
+     * Replace the resolved client with a fake for the duration of a test.
+     */
+    public static function fake(?SocialKitFake $fake = null): SocialKitFake
+    {
+        $fake ??= new SocialKitFake();
+
+        static::swap($fake);
+
+        return $fake;
+    }
+
     /**
      * Get the registered name of the component in the service container.
      */

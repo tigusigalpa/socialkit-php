@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Made `SocialKit::fake()` functional for all service accessors, so service calls
+  are queued and recorded instead of creating a real HTTP client.
+- Retried transport failures when retries are enabled and redact the access key
+  from transport error messages.
+- Bound retained non-2xx response bodies to 1 MiB, preventing oversized upstream
+  error pages from consuming unbounded memory.
+- Escaped asynchronous download job IDs as URL path segments and reject empty IDs.
+
+### Changed
+
+- Compatibility authentication now keeps the `x-access-key` header while also
+  adding `access_key` to the query/body, matching the Go SDK.
+- Added validation for unsafe download polling options and support for
+  `SOCIALKIT_USER_AGENT` and `SOCIALKIT_KEY_IN_QUERY` in `SocialKitConfig::fromEnv()`.
+- Added GitHub Actions workflows for the PHP test matrix, Codecov coverage, and
+  scheduled CodeQL security analysis.
+
 ## [1.0.0] - 2026-01-01
 
 ### Added

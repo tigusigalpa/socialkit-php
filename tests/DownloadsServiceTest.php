@@ -65,6 +65,24 @@ final class DownloadsServiceTest extends TestCase
         self::assertSame('/v2/downloads/job-abc-123', $request->getUri()->getPath());
     }
 
+    public function testGetEscapesTheJobIdAsOnePathSegment(): void
+    {
+        $client = $this->makeClient([
+            $this->json(['success' => true, 'data' => ['job_id' => 'job-1', 'status' => 'ready']]),
+        ]);
+
+        $client->downloads()->get('a/b?c#d e');
+
+        self::assertSame('/v2/downloads/a%2Fb%3Fc%23d%20e', $this->lastRequest()->getUri()->getPath());
+    }
+
+    public function testGetRequiresAJobId(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        $this->makeClient([])->downloads()->get('');
+    }
+
     public function testWaitSucceedsWhenReady(): void
     {
         $client = $this->makeClient([
@@ -177,5 +195,12 @@ final class DownloadsServiceTest extends TestCase
             url: 'https://test.com',
             maxDuration: -1,
         );
+    }
+
+    public function testWaitOptionsRejectNonPositiveInterval(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        new WaitOptions(interval: 0.0);
     }
 }

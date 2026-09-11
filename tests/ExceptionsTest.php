@@ -20,6 +20,21 @@ use Tigusigalpa\SocialKit\Exceptions\TransportException;
 
 final class ExceptionsTest extends TestCase
 {
+    public function testErrorResponseBodyIsBounded(): void
+    {
+        $client = $this->makeClient([
+            new Response(500, [], str_repeat('x', 1_048_577)),
+        ]);
+
+        try {
+            $client->request('/youtube/transcript', ['url' => 'https://test.com']);
+            self::fail('Expected ServerException');
+        } catch (ServerException $e) {
+            self::assertNotNull($e->getMeta());
+            self::assertSame(1_048_576, strlen($e->getMeta()->rawBody));
+        }
+    }
+
     public function testBadRequestException(): void
     {
         $client = $this->makeClient([

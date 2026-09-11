@@ -120,57 +120,46 @@ final class SocialKitFake implements SocialKitClientInterface
 
     public function status(): ServiceService
     {
-        return new ServiceService($this->getRealClient());
+        return new ServiceService($this);
     }
 
     public function youtube(): YouTubeService
     {
-        return new YouTubeService($this->getRealClient());
+        return new YouTubeService($this);
     }
 
     public function tiktok(): TikTokService
     {
-        return new TikTokService($this->getRealClient());
+        return new TikTokService($this);
     }
 
     public function instagram(): InstagramService
     {
-        return new InstagramService($this->getRealClient());
+        return new InstagramService($this);
     }
 
     public function facebook(): FacebookService
     {
-        return new FacebookService($this->getRealClient());
+        return new FacebookService($this);
     }
 
     public function twitter(): TwitterService
     {
-        return new TwitterService($this->getRealClient());
+        return new TwitterService($this);
     }
 
     public function linkedin(): LinkedInService
     {
-        return new LinkedInService($this->getRealClient());
+        return new LinkedInService($this);
     }
 
     public function video(): VideoService
     {
-        return new VideoService($this->getRealClient());
+        return new VideoService($this);
     }
 
     public function downloads(): DownloadsService
     {
-        return new DownloadsService($this->getRealClient());
-    }
-
-    /**
-     * Get a real client instance for service accessor methods.
-     *
-     * In practice, tests typically use request() directly or mock
-     * at the service level. This method provides a fallback.
-     */
-    private function getRealClient(): \Tigusigalpa\SocialKit\SocialKitClient
-    {
-        return \Tigusigalpa\SocialKit\SocialKitClient::make('fake-key');
+        return new DownloadsService($this);
     }
 }

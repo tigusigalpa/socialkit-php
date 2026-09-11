@@ -1,10 +1,14 @@
-name: CI
+name: Tests
 
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   test:
@@ -17,7 +21,9 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -31,11 +37,8 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --no-progress
 
+      - name: Audit dependencies
+        run: composer audit --locked --no-interaction
+
       - name: Run tests
         run: composer test
-
-      - name: Check formatting (PSR-12)
-        run: |
-          if ! vendor/bin/phpcs --standard=PSR12 src --ignore=*/Laravel/* 2>/dev/null; then
-            echo "PSR-12 formatting check skipped (phpcs not installed)"
-          fi

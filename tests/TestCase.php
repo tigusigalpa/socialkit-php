@@ -24,7 +24,7 @@ abstract class TestCase extends BaseTestCase
     /**
      * Build a SocialKitClient with a mocked Guzzle HTTP client.
      *
-     * @param list<Response> $responses
+     * @param list<Response|\Throwable> $responses
      */
     protected function makeClient(array $responses, int $retryAttempts = 0, float $retryDelay = 0.0, bool $keyInQuery = false): SocialKitClient
     {

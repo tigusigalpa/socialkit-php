@@ -21,5 +21,20 @@ final class WaitOptions
         public readonly ?float $timeout = 120.0,
         public readonly ?int $maxPolls = null,
     ) {
+        if ($interval <= 0) {
+            throw new \InvalidArgumentException('interval must be greater than zero.');
+        }
+
+        if ($maxInterval < $interval) {
+            throw new \InvalidArgumentException('maxInterval must be greater than or equal to interval.');
+        }
+
+        if ($timeout !== null && $timeout <= 0) {
+            throw new \InvalidArgumentException('timeout must be greater than zero when provided.');
+        }
+
+        if ($maxPolls !== null && $maxPolls <= 0) {
+            throw new \InvalidArgumentException('maxPolls must be greater than zero when provided.');
+        }
     }
 }

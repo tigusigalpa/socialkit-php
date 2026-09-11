@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Tigusigalpa\SocialKit\Tests;
 
 use GuzzleHttp\Client as GuzzleClient;
+use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use Tigusigalpa\SocialKit\SocialKitClient;
 use Tigusigalpa\SocialKit\SocialKitConfig;
@@ -63,6 +65,12 @@ final class ClientTest extends TestCase
         self::assertSame(1.0, $config->retryDelay);
         self::assertFalse($config->keyInQuery);
         self::assertSame('SocialKit-PHP-SDK/1.0.0', $config->userAgent);
+    }
+
+    public function testConfigParsesStringBooleanValues(): void
+    {
+        self::assertFalse(SocialKitConfig::fromArray(['access_key' => 'key', 'key_in_query' => 'false'])->keyInQuery);
+        self::assertTrue(SocialKitConfig::fromArray(['access_key' => 'key', 'key_in_query' => 'true'])->keyInQuery);
     }
 
     public function testRedactKey(): void
@@ -161,8 +169,8 @@ final class ClientTest extends TestCase
         $client->request('/youtube/transcript', ['url' => 'https://test.com']);
 
         $request = $this->lastRequest();
-        // Key should NOT be in header when keyInQuery is true
-        self::assertSame('', $request->getHeaderLine('x-access-key'));
+        // The header remains the primary authentication mechanism.
+        self::assertSame('test-key-12345', $request->getHeaderLine('x-access-key'));
 
         // Key should be in the JSON body
         $body = json_decode((string) $request->getBody(), true);
@@ -180,6 +188,36 @@ final class ClientTest extends TestCase
         $request = $this->lastRequest();
         $query = $request->getUri()->getQuery();
         self::assertStringContainsString('access_key=test-key-12345', $query);
+        self::assertSame('test-key-12345', $request->getHeaderLine('x-access-key'));
+    }
+
+    public function testRetriesTransportErrorsAndRedactsTheAccessKey(): void
+    {
+        $exception = new ConnectException(
+            'Dial failed for access_key=test-key-12345',
+            new Request('POST', 'https://api.socialkit.dev/youtube/transcript'),
+        );
+
+        $client = $this->makeClient([
+            $exception,
+            $exception,
+            $this->json(['success' => true, 'data' => []]),
+        ], retryAttempts: 2);
+
+        $response = $client->request('/youtube/transcript', ['url' => 'https://test.com']);
+
+        self::assertTrue($response->success);
+        self::assertCount(3, $this->history);
+
+        $failingClient = $this->makeClient([$exception]);
+
+        try {
+            $failingClient->request('/youtube/transcript', ['url' => 'https://test.com']);
+            self::fail('Expected TransportException');
+        } catch (\Tigusigalpa\SocialKit\Exceptions\TransportException $e) {
+            self::assertStringNotContainsString('test-key-12345', $e->getMessage());
+            self::assertStringContainsString('[REDACTED]', $e->getMessage());
+        }
     }
 
     public function testResponseMetaHeaders(): void

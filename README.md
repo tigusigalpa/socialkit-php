@@ -1,4 +1,14 @@
-# SocialKit PHP SDK
+# SocialKit PHP/Laravel Client/SDK/Library
+
+![SocialKit PHP Laravel SDK Client](https://i.postimg.cc/YqfhVyhf/socialkit-php-laravel-hero-sdk.jpg)
+
+[![Packagist Version](https://img.shields.io/packagist/v/tigusigalpa/socialkit-php.svg)](https://packagist.org/packages/tigusigalpa/socialkit-php)
+[![PHP Version](https://img.shields.io/packagist/php-v/tigusigalpa/socialkit-php.svg)](https://packagist.org/packages/tigusigalpa/socialkit-php)
+[![License](https://img.shields.io/packagist/l/tigusigalpa/socialkit-php.svg)](LICENSE)
+[![Tests](https://github.com/tigusigalpa/socialkit-php/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/tigusigalpa/socialkit-php/actions/workflows/ci.yml)
+[![Coverage](https://github.com/tigusigalpa/socialkit-php/actions/workflows/coverage.yml/badge.svg?branch=main)](https://github.com/tigusigalpa/socialkit-php/actions/workflows/coverage.yml)
+[![Codecov](https://codecov.io/gh/tigusigalpa/socialkit-php/graph/badge.svg)](https://codecov.io/gh/tigusigalpa/socialkit-php)
+[![CodeQL](https://github.com/tigusigalpa/socialkit-php/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/tigusigalpa/socialkit-php/actions/workflows/codeql.yml)
 
 > **Scrape social media content, transcripts, and stats from YouTube, TikTok, Instagram, Facebook, Twitter/X, and LinkedIn — right where your PHP code lives.**
 
@@ -14,11 +24,6 @@ $transcript = SocialKit::youtube()->transcript(new TranscriptRequest(
 
 echo $transcript->data->transcript;
 ```
-
-[![Packagist Version](https://img.shields.io/packagist/v/tigusigalpa/socialkit-php.svg)](https://packagist.org/packages/tigusigalpa/socialkit-php)
-[![PHP Version](https://img.shields.io/packagist/php-v/tigusigalpa/socialkit-php.svg)](https://packagist.org/packages/tigusigalpa/socialkit-php)
-[![License](https://img.shields.io/packagist/l/tigusigalpa/socialkit-php.svg)](LICENSE)
-[![Tests](https://img.shields.io/github/actions/workflow/status/tigusigalpa/socialkit-php/ci.yml?branch=main&label=tests)](https://github.com/tigusigalpa/socialkit-php/actions)
 
 ---
 
@@ -129,7 +134,7 @@ SOCIALKIT_RETRY_DELAY=1
 | `timeout`                    | `SOCIALKIT_TIMEOUT`        | `30`                          | Per-request timeout in seconds.                |
 | `retry_attempts`             | `SOCIALKIT_RETRY_ATTEMPTS` | `0`                           | Auto retries on 429/5xx (0 = no retries).      |
 | `retry_delay`                | `SOCIALKIT_RETRY_DELAY`    | `1.0`                         | Base backoff delay in seconds.                 |
-| `key_in_query`               | —                          | `false`                       | Compatibility: send key as query/body param.   |
+| `key_in_query`               | `SOCIALKIT_KEY_IN_QUERY`   | `false`                       | Compatibility: also send key as query/body param. |
 | `user_agent`                 | —                          | `SocialKit-PHP-SDK/1.0.0`     | User-Agent header.                             |
 
 ## Quick Start
@@ -492,14 +497,12 @@ class VideoController
 ### Fake (Testing)
 
 ```php
-use Tigusigalpa\SocialKit\Laravel\SocialKitFake;
-use Tigusigalpa\SocialKit\ApiResponse;
-use Tigusigalpa\SocialKit\ResponseMeta;
+use Tigusigalpa\SocialKit\Laravel\Facades\SocialKit;
 
-$fake = new SocialKitFake();
+$fake = SocialKit::fake();
 $fake->queueData(['overall' => 'green', 'generated_at' => '2026-01-01']);
 
-$response = $fake->request('/status', null, 'GET');
+$response = SocialKit::status()->status();
 $fake->assertRequested('/status');
 ```
 
@@ -514,8 +517,9 @@ All tests use Guzzle's `MockHandler` — no real API calls, no network required.
 
 ## Compatibility
 
-- **Authentication:** `x-access-key` header by default. Set `keyInQuery: true`
-  for the `access_key` query/body parameter compatibility mode.
+- **Authentication:** `x-access-key` header on every authenticated request. Set
+  `keyInQuery: true` to additionally send `access_key` as a query/body parameter
+  for compatibility mode.
 - **Request strategy:** Protected scrape/read operations default to POST with
   JSON body (keeps key out of URL). GET is available via explicit method override.
 - **Always GET:** `status()`, `credits()`, `downloads.get()`.

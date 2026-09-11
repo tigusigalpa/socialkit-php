@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tigusigalpa\SocialKit\Services;
 
 use Tigusigalpa\SocialKit\ApiResponse;
-use Tigusigalpa\SocialKit\SocialKitClient;
+use Tigusigalpa\SocialKit\SocialKitClientInterface;
 
 /**
  * Base class for all SocialKit service groups.
@@ -15,7 +15,7 @@ use Tigusigalpa\SocialKit\SocialKitClient;
  */
 abstract class AbstractService
 {
-    public function __construct(protected readonly SocialKitClient $client)
+    public function __construct(protected readonly SocialKitClientInterface $client)
     {
     }
 

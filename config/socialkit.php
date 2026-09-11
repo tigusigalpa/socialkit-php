@@ -21,7 +21,7 @@ return [
     |
     | Your SocialKit API access key. It is sent as `x-access-key` header
     | by default. Set `key_in_query` to true to send it as a query/body
-    | parameter instead (compatibility mode).
+    | parameter as well (compatibility mode).
     |
     */
     'access_key' => env('SOCIALKIT_ACCESS_KEY', ''),
@@ -70,11 +70,11 @@ return [
     | Key In Query
     |--------------------------------------------------------------------------
     |
-    | Compatibility opt-in: send the access key as a query/body parameter
-    | instead of the x-access-key header. Default is false.
+    | Compatibility opt-in: additionally send the access key as a query/body
+    | parameter. The secure x-access-key header is always included. Default is false.
     |
     */
-    'key_in_query' => false,
+    'key_in_query' => env('SOCIALKIT_KEY_IN_QUERY', false),
 
     /*
     |--------------------------------------------------------------------------

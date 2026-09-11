@@ -20,8 +20,8 @@ final class SocialKitConfig
      * @param float                $retryDelay     Base delay (in seconds) for exponential backoff between retries.
      * @param string               $userAgent      User-Agent header value sent with every request.
      * @param array<string, mixed> $defaultHeaders Additional default headers merged into every request.
-     * @param bool                 $keyInQuery     Compatibility opt-in: send the access key as a query/body parameter
-     *                                            instead of (or in addition to) the x-access-key header.
+     * @param bool                 $keyInQuery     Compatibility opt-in: additionally send the access key as a
+     *                                            query/body parameter.
      */
     public function __construct(
         public readonly string $accessKey,
@@ -53,7 +53,7 @@ final class SocialKitConfig
             retryDelay: (float) ($config['retry_delay'] ?? 1.0),
             userAgent: (string) ($config['user_agent'] ?? 'SocialKit-PHP-SDK/1.0.0'),
             defaultHeaders: (array) ($config['default_headers'] ?? []),
-            keyInQuery: (bool) ($config['key_in_query'] ?? false),
+            keyInQuery: self::toBool($config['key_in_query'] ?? false),
         );
     }
 
@@ -61,7 +61,8 @@ final class SocialKitConfig
      * Create a configuration instance from environment variables.
      *
      * Recognized variables: `SOCIALKIT_ACCESS_KEY`, `SOCIALKIT_BASE_URL`,
-     * `SOCIALKIT_TIMEOUT`, `SOCIALKIT_RETRY_ATTEMPTS`, `SOCIALKIT_RETRY_DELAY`.
+     * `SOCIALKIT_TIMEOUT`, `SOCIALKIT_RETRY_ATTEMPTS`, `SOCIALKIT_RETRY_DELAY`,
+     * `SOCIALKIT_USER_AGENT`, `SOCIALKIT_KEY_IN_QUERY`.
      */
     public static function fromEnv(): self
     {
@@ -71,6 +72,25 @@ final class SocialKitConfig
             'timeout' => getenv('SOCIALKIT_TIMEOUT') ?: 30.0,
             'retry_attempts' => getenv('SOCIALKIT_RETRY_ATTEMPTS') ?: 0,
             'retry_delay' => getenv('SOCIALKIT_RETRY_DELAY') ?: 1.0,
+            'user_agent' => getenv('SOCIALKIT_USER_AGENT') ?: 'SocialKit-PHP-SDK/1.0.0',
+            'key_in_query' => getenv('SOCIALKIT_KEY_IN_QUERY') ?: false,
         ]);
+    }
+
+    private static function toBool(mixed $value): bool
+    {
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        if (is_int($value)) {
+            return $value !== 0;
+        }
+
+        if (is_string($value)) {
+            return filter_var($value, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE) ?? false;
+        }
+
+        return false;
     }
 }
