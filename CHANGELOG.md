@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added validation for unsafe download polling options and support for
   `SOCIALKIT_USER_AGENT` and `SOCIALKIT_KEY_IN_QUERY` in `SocialKitConfig::fromEnv()`.
 - Added GitHub Actions workflows for the PHP test matrix, Codecov coverage, and
-  scheduled CodeQL security analysis.
+  scheduled CodeQL analysis of GitHub Actions workflows.
 
 ## [1.0.0] - 2026-01-01
 

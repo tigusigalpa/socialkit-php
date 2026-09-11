@@ -8,7 +8,7 @@
 [![Tests](https://github.com/tigusigalpa/socialkit-php/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/tigusigalpa/socialkit-php/actions/workflows/ci.yml)
 [![Coverage](https://github.com/tigusigalpa/socialkit-php/actions/workflows/coverage.yml/badge.svg?branch=main)](https://github.com/tigusigalpa/socialkit-php/actions/workflows/coverage.yml)
 [![Codecov](https://codecov.io/gh/tigusigalpa/socialkit-php/graph/badge.svg)](https://codecov.io/gh/tigusigalpa/socialkit-php)
-[![CodeQL](https://github.com/tigusigalpa/socialkit-php/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/tigusigalpa/socialkit-php/actions/workflows/codeql.yml)
+[![CodeQL Actions](https://github.com/tigusigalpa/socialkit-php/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/tigusigalpa/socialkit-php/actions/workflows/codeql.yml)
 
 > **Scrape social media content, transcripts, and stats from YouTube, TikTok, Instagram, Facebook, Twitter/X, and LinkedIn — right where your PHP code lives.**
 
