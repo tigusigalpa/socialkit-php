@@ -164,7 +164,7 @@ echo $stats->data->views; // 1000000
 
 // 4. AI summary
 $summary = $client->youtube()->summarize(new SummaryRequest(
-    url: 'https://youtube.com/watch?v=dQw4w9WgXcQ',
+    url: 'https://youtube.com/watch?v=dQw4w9WgXct',
 ));
 echo $summary->data->summary;
 
